@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ORION Voice</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Heebo:wght@300;400;600&family=Share+Tech+Mono&display=swap">
+<style>
+:root{--void:#03080d;--panel:rgba(10,32,46,.55);--line:#0f4a63;--holo:#3fe0ff;--holo-dim:#1b8fae;--amber:#ffb547;--text:#d8f6ff;--mute:#6fa3b6;--red:#ff5a6a;
+  --f-display:"Orbitron","Heebo",system-ui,sans-serif;--f-body:"Heebo",system-ui,sans-serif;--f-mono:"Share Tech Mono",ui-monospace,monospace;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--void);color:var(--text);font-family:var(--f-body);padding:16px;
+  background-image:radial-gradient(ellipse at 50% 15%,rgba(63,224,255,.10),transparent 60%),
+  linear-gradient(rgba(63,224,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(63,224,255,.04) 1px,transparent 1px);
+  background-size:auto,32px 32px,32px 32px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:10px}
+canvas{width:min(280px,72vw);aspect-ratio:1;cursor:pointer}
+h1{font-family:var(--f-display);font-weight:900;letter-spacing:.45em;margin:0;font-size:clamp(28px,7vw,42px);color:var(--holo);
+  text-shadow:0 0 18px rgba(63,224,255,.6);direction:ltr;padding-left:.45em}
+.status{font-family:var(--f-mono);letter-spacing:.15em;font-size:13px;color:var(--mute);direction:ltr;min-height:1.3em}
+.status.on{color:var(--amber)}
+.heard{min-height:1.6em;font-size:16px;color:var(--text);opacity:.8;text-align:center}
+.mic{font-family:var(--f-body);font-size:18px;font-weight:600;padding:14px 32px;border:2px solid var(--holo);background:transparent;color:var(--holo);cursor:pointer;border-radius:999px}
+.mic.on{background:var(--holo);color:var(--void);box-shadow:0 0 24px rgba(63,224,255,.6)}
+.mic:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.log{width:100%;display:flex;flex-direction:column;gap:10px;max-height:40vh;overflow-y:auto;padding:4px}
+.msg{max-width:85%;padding:10px 14px;line-height:1.6;font-size:15px}
+.msg.ai{align-self:flex-start;border-right:2px solid var(--holo);background:rgba(63,224,255,.07)}
+.msg.me{align-self:flex-end;background:rgba(255,181,71,.10);border-left:2px solid var(--amber)}
+.who{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;color:var(--mute)}
+form{display:flex;gap:8px;width:100%}
+input{flex:1;min-width:0;background:rgba(3,8,13,.8);border:1px solid var(--line);color:var(--text);padding:12px;font:inherit;font-size:16px}
+input:focus{outline:none;border-color:var(--holo)}
+form button{background:transparent;border:1px solid var(--holo);color:var(--holo);padding:0 16px;font:inherit;cursor:pointer}
+.help{font-size:13px;color:var(--mute);line-height:1.7;text-align:center}
+.warn{color:var(--red);font-size:14px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <canvas id="reactor" width="600" height="600" aria-hidden="true"></canvas>
+  <h1 id="name">ORION</h1>
+  <div class="status" id="status">STANDBY</div>
+  <button class="mic" id="mic">התחל להקשיב</button>
+  <div class="heard" id="heard"></div>
+  <div class="warn" id="warn" hidden></div>
+  <div class="log" id="log"></div>
+  <form id="f"><input id="q" placeholder="או כתוב כאן…" autocomplete="off"><button>שלח</button></form>
+  <div class="help">אפשר להגיד: "היי" · "מה השעה" · "מה התאריך" · "ספר בדיחה" · "כמה זה 7 כפול 8" ·
+    "תפתח יוטיוב" · "חפש מתכון לפנקייק" · "קוראים לך מקס" · "איך קוראים לך" · "תפסיק להקשיב"</div>
+</div>
+<script>
+// ===== reactor =====
+const cv=document.getElementById('reactor'),cx=cv.getContext('2d');let pulse=0,busy=false;
+function draw(t){const C=300,a=t/1000*(busy?3:1),glow=.6+.4*Math.sin(t/400)+pulse;cx.clearRect(0,0,600,600);cx.lineCap='round';
+  cx.save();cx.translate(C,C);cx.rotate(a*.15);for(let i=0;i<120;i++){cx.rotate(Math.PI/60);cx.strokeStyle=i%10?'rgba(63,224,255,.25)':'rgba(63,224,255,.8)';cx.lineWidth=2;cx.beginPath();cx.moveTo(0,-280);cx.lineTo(0,i%10?-268:-255);cx.stroke();}cx.restore();
+  [[230,8,-.4,6],[195,4,.7,3],[160,10,-1.1,8]].forEach(([r,w,s,n],k)=>{cx.save();cx.translate(C,C);cx.rotate(a*s);for(let i=0;i<n;i++){cx.strokeStyle=`rgba(63,224,255,${.35+.15*k})`;cx.lineWidth=w;cx.beginPath();const st=i*Math.PI*2/n;cx.arc(0,0,r,st,st+Math.PI*2/n*.7);cx.stroke();}cx.restore();});
+  cx.save();cx.translate(C,C);cx.rotate(-a*.5);cx.fillStyle=listening?'#ffb547':'#1b8fae';cx.beginPath();cx.arc(0,-212,7,0,7);cx.fill();cx.restore();
+  const g=cx.createRadialGradient(C,C,0,C,C,130);g.addColorStop(0,'rgba(220,250,255,.95)');g.addColorStop(.35,`rgba(63,224,255,${Math.min(1,.55*glow)})`);g.addColorStop(1,'rgba(63,224,255,0)');
+  cx.fillStyle=g;cx.beginPath();cx.arc(C,C,130,0,7);cx.fill();
+  cx.save();cx.translate(C,C);cx.rotate(a*.05);cx.strokeStyle='rgba(220,250,255,.9)';cx.lineWidth=4;cx.beginPath();for(let i=0;i<3;i++){const an=-Math.PI/2+i*2*Math.PI/3;cx[i?'lineTo':'moveTo'](Math.cos(an)*90,Math.sin(an)*90);}cx.closePath();cx.stroke();cx.restore();
+  cx.strokeStyle='rgba(63,224,255,.9)';cx.lineWidth=3;cx.beginPath();cx.arc(C,C,118,0,7);cx.stroke();pulse*=.93;requestAnimationFrame(draw);}
+requestAnimationFrame(draw);
+
+// ===== state =====
+let NAME='ORION';try{NAME=localStorage.getItem('aiName')||NAME}catch(e){}
+const $=id=>document.getElementById(id),log=$('log'),statusEl=$('status'),heard=$('heard'),micBtn=$('mic');
+$('name').textContent=NAME;
+function add(who,text){const m=document.createElement('div');m.className='msg '+who;const w=document.createElement('span');w.className='who';
+  w.textContent=who==='me'?'YOU':NAME.toUpperCase();m.append(w,document.createTextNode(text));log.append(m);log.scrollTop=log.scrollHeight;}
+
+// ===== speech out =====
+function heVoice(){return speechSynthesis.getVoices().find(v=>/^(he|iw)/i.test(v.lang))||null}
+if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{};
+function say(text){
+  add('ai',text);
+  if(!window.speechSynthesis)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text),v=heVoice();if(v)u.voice=v;u.lang=v?v.lang:'he-IL';u.rate=1.05;u.pitch=.9;
+  u.onstart=()=>{busy=true;pauseRec();};u.onboundary=()=>{pulse=.5};
+  u.onend=u.onerror=()=>{busy=false;resumeRec();};
+  speechSynthesis.speak(u);
+}
+
+// ===== brain (built-in commands) =====
+const jokes=["למה המחשב הלך לרופא? כי היה לו וירוס.","מה אמר האפס לשמונה? איזה חגורה יפה!","למה הרובוט לא מפחד? כי יש לו לב מברזל.","מה עושה דג במחשב? גולש ברשת.","למה הספר של המתמטיקה עצוב? כי יש לו יותר מדי בעיות."];
+const sites={"יוטיוב":"https://www.youtube.com","גוגל":"https://www.google.com","ווטסאפ":"https://web.whatsapp.com","וואטסאפ":"https://web.whatsapp.com","טיקטוק":"https://www.tiktok.com","אינסטגרם":"https://www.instagram.com","נטפליקס":"https://www.netflix.com","ספוטיפיי":"https://open.spotify.com","מיינקראפט":"https://www.minecraft.net","ויקיפדיה":"https://he.wikipedia.org"};
+const numWords={"אפס":0,"אחד":1,"אחת":1,"שתיים":2,"שניים":2,"שתים":2,"שלוש":3,"שלושה":3,"ארבע":4,"ארבעה":4,"חמש":5,"חמישה":5,"שש":6,"שישה":6,"שבע":7,"שבעה":7,"שמונה":8,"תשע":9,"תשעה":9,"עשר":10,"עשרה":10,"מאה":100,"אלף":1000};
+function calc(t){
+  let s=' '+t.replace(/[?!.,]/g,' ')+' ';
+  for(const w in numWords)s=s.replace(new RegExp('(^|\\s)ו?'+w+'(?=\\s)','g'),' '+numWords[w]+' ');
+  s=s.replace(/ועוד|פלוס/g,'+').replace(/פחות|מינוס/g,'-').replace(/כפול|כפל|×|x/g,'*').replace(/חלקי|לחלק ל|חלקו/g,'/');
+  const m=s.match(/-?\d+(\.\d+)?(\s*[-+*/]\s*-?\d+(\.\d+)?)+/);if(!m)return null;
+  try{const r=Function('"use strict";return ('+m[0]+')')();if(!isFinite(r))return 'אי אפשר לחלק באפס, אדוני.';
+    return `${m[0].replace(/\*/g,'×').replace(/\//g,'÷')} = ${Math.round(r*1000)/1000}`}catch(e){return null}
+}
+function brain(raw){
+  const t=raw.trim().toLowerCase();
+  let m;
+  if(/תפסיק להקשיב|תפסיק|עצור|שקט/.test(t)){stopRec();return 'בסדר, אדוני. אני עובר למצב המתנה.'}
+  if((m=t.match(/(?:קוראים לך|תקרא לעצמך|השם שלך יהיה|מעכשיו אתה)\s+(.+)/))){
+    NAME=m[1].replace(/[.!?]/g,'').trim().slice(0,16);try{localStorage.setItem('aiName',NAME)}catch(e){}$('name').textContent=NAME;
+    return `מעכשיו קוראים לי ${NAME}. נעים מאוד, אדוני.`}
+  if(/איך קוראים לך|מה השם שלך|מי אתה/.test(t))return `קוראים לי ${NAME}. אני העוזר האישי שלך.`;
+  if(/מה השעה|כמה השעה/.test(t)){const d=new Date();return `השעה עכשיו ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}.`}
+  if(/תאריך|איזה יום|מה היום/.test(t))return 'היום '+new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'.';
+  if(/בדיחה|תצחיק/.test(t))return jokes[Math.random()*jokes.length|0];
+  if(/מה שלומך|מה נשמע|מה קורה|מה המצב/.test(t))return 'כל המערכות פועלות מצוין, אדוני. ומה שלומך?';
+  if(/תודה/.test(t))return 'תמיד לשירותך, אדוני.';
+  if(/^(היי|הי|הַי|שלום|הלו|בוקר טוב|ערב טוב|אהלן|hey|hi|hello)\b|^(היי|הי|שלום)/.test(t)||t===NAME.toLowerCase()){
+    const h=new Date().getHours();const g=h<12?'בוקר טוב':h<18?'צהריים טובים':'ערב טוב';return `${g}, אדוני. ${NAME} מוכן. במה אוכל לעזור?`}
+  if((m=t.match(/(?:תפתח|פתח|תכנס ל|כנס ל)\s*(?:את\s*)?(.+)/))){
+    const k=Object.keys(sites).find(s=>m[1].includes(s));
+    if(k){window.open(sites[k],'_blank');return `פותח את ${k}, אדוני.`}
+    return `אני לא מכיר את האתר "${m[1]}". אני יכול לפתוח יוטיוב, גוגל, ווטסאפ, טיקטוק, אינסטגרם, נטפליקס, ספוטיפיי או ויקיפדיה.`}
+  if((m=t.match(/(?:חפש|תחפש|תחפש לי|חפש לי)\s+(.+)/))){window.open('https://www.google.com/search?q='+encodeURIComponent(m[1]),'_blank');return `מחפש בגוגל: ${m[1]}.`}
+  const c=calc(t);if(c)return c;
+  return `לא הבנתי, אדוני. נסה להגיד "מה השעה", "ספר בדיחה", או "חפש" ואחריו מה שאתה רוצה.`;
+}
+function handle(text){if(!text.trim())return;add('me',text);say(brain(text));}
+$('f').addEventListener('submit',e=>{e.preventDefault();handle($('q').value);$('q').value='';});
+
+// ===== speech in =====
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,listening=false,paused=false;
+function warn(msg){$('warn').textContent=msg;$('warn').hidden=false}
+if(!SR){micBtn.disabled=true;warn('הדפדפן הזה לא תומך בזיהוי דיבור. תפתח את הקובץ בכרום (Chrome).')}
+else{
+  rec=new SR();rec.lang='he-IL';rec.continuous=true;rec.interimResults=true;
+  rec.onresult=e=>{let fin='',interim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];(r.isFinal?(fin+=r[0].transcript):(interim+=r[0].transcript));}
+    heard.textContent=interim||fin;pulse=.3;if(fin.trim()){heard.textContent='';handle(fin)}};
+  rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){stopRec();warn('אין גישה למיקרופון. תאשר מיקרופון לאתר בהגדרות הדפדפן ונסה שוב.')}};
+  rec.onend=()=>{if(listening&&!paused){try{rec.start()}catch(e){}}};
+}
+function setUI(){micBtn.classList.toggle('on',listening);micBtn.textContent=listening?'מקשיב… (לחץ לעצור)':'התחל להקשיב';
+  statusEl.textContent=listening?'LISTENING':'STANDBY';statusEl.classList.toggle('on',listening)}
+function startRec(){if(!rec)return;listening=true;paused=false;$('warn').hidden=true;try{rec.start()}catch(e){}setUI()}
+function stopRec(){listening=false;if(rec)try{rec.stop()}catch(e){}setUI()}
+function pauseRec(){if(listening&&rec){paused=true;try{rec.abort()}catch(e){}}}
+function resumeRec(){if(listening&&rec){paused=false;try{rec.start()}catch(e){}}}
+micBtn.addEventListener('click',()=>{if(listening){stopRec()}else{startRec();if(!log.children.length)say(`${NAME} פעיל. תגיד היי.`)}});
+cv.addEventListener('click',()=>micBtn.click());
+</script>
+</body>
+</html>
