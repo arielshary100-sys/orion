@@ -2,433 +2,365 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ORION</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Heebo:wght@300;400;600&family=Share+Tech+Mono&display=swap">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>מגע אוויר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
 <style>
-:root{--rgb:63,224,255;--holo:rgb(var(--rgb));--void:#03080d;--line:rgba(var(--rgb),.3);--amber:#ffb547;--text:#d8f6ff;--mute:#7fa9b8;--red:#ff5a6a;
-  --f-display:"Orbitron","Heebo",system-ui,sans-serif;--f-body:"Heebo",system-ui,sans-serif;--f-mono:"Share Tech Mono",ui-monospace,monospace;color-scheme:dark}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%}
-body{background:var(--void);color:var(--text);font-family:var(--f-body);padding:16px;
-  background-image:radial-gradient(ellipse at 50% 15%,rgba(var(--rgb),.10),transparent 60%),
-  linear-gradient(rgba(var(--rgb),.04) 1px,transparent 1px),linear-gradient(90deg,rgba(var(--rgb),.04) 1px,transparent 1px);
-  background-size:auto,32px 32px,32px 32px}
-.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:10px}
-canvas{width:min(270px,70vw);aspect-ratio:1;cursor:pointer}
-h1{font-family:var(--f-display);font-weight:900;letter-spacing:.45em;margin:0;font-size:clamp(28px,7vw,42px);color:var(--holo);
-  text-shadow:0 0 18px rgba(var(--rgb),.6);direction:ltr;padding-left:.45em}
-.status{font-family:var(--f-mono);letter-spacing:.15em;font-size:13px;color:var(--mute);direction:ltr;min-height:1.3em}
-.status.on{color:var(--amber)}
-.heard{min-height:1.6em;font-size:16px;opacity:.8;text-align:center}
-.btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.mic{font-family:var(--f-body);font-size:18px;font-weight:600;padding:14px 32px;border:2px solid var(--holo);background:transparent;color:var(--holo);cursor:pointer;border-radius:999px}
-.mic.on{background:var(--holo);color:var(--void);box-shadow:0 0 24px rgba(var(--rgb),.6)}
-.small{font:inherit;font-size:13px;padding:8px 14px;border:1px solid var(--line);background:transparent;color:var(--mute);cursor:pointer;border-radius:999px}
-.small[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
-button:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
-.timers{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.timer{font-family:var(--f-mono);font-size:14px;padding:6px 12px;border:1px solid var(--amber);color:var(--amber);border-radius:6px;font-variant-numeric:tabular-nums}
-.log{width:100%;display:flex;flex-direction:column;gap:10px;max-height:42vh;overflow-y:auto;padding:4px}
-.msg{max-width:85%;padding:10px 14px;line-height:1.6;font-size:15px;white-space:pre-wrap}
-.msg.ai{align-self:flex-start;border-right:2px solid var(--holo);background:rgba(var(--rgb),.07)}
-.msg.me{align-self:flex-end;background:rgba(255,181,71,.10);border-left:2px solid var(--amber)}
-.msg a{color:var(--holo);font-weight:600}
-.who{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;color:var(--mute)}
-form{display:flex;gap:8px;width:100%}
-input{flex:1;min-width:0;background:rgba(3,8,13,.8);border:1px solid var(--line);color:var(--text);padding:12px;font:inherit;font-size:16px}
-input:focus{outline:none;border-color:var(--holo)}
-form button{background:transparent;border:1px solid var(--holo);color:var(--holo);padding:0 16px;font:inherit;cursor:pointer}
-details{width:100%;font-size:14px;color:var(--mute);line-height:1.8}
-summary{cursor:pointer;color:var(--holo);text-align:center}
-details ul{margin:8px 0;padding-right:20px}
-.warn{color:var(--red);font-size:14px;text-align:center}
-#boot{position:fixed;inset:0;background:var(--void);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px}
-#boot pre{font-family:var(--f-mono);color:var(--holo);font-size:14px;line-height:1.7;direction:ltr;text-align:left;min-height:12em;margin:0;white-space:pre-wrap;max-width:100%}
-#boot .go{font-family:var(--f-body);font-weight:600;letter-spacing:.1em;font-size:18px;padding:16px 36px;background:transparent;border:2px solid var(--holo);color:var(--holo);cursor:pointer;border-radius:4px;box-shadow:0 0 24px rgba(var(--rgb),.4)}
-#boot .go:hover{background:var(--holo);color:var(--void)}
-#boot.out{opacity:0;pointer-events:none;transition:opacity .6s}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Layout: full-screen tablet shell; one view at a time; floating air-cursor above everything */
+:root{
+  --bg:#0d1117; --panel:#161c26; --panel2:#1f2733; --fg:#eef2f7; --muted:#8b98ab;
+  --accent:#4cc9f0; --pinch:#ff5d8f; --ok:#5be39b;
+  --font:"Rubik", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);overflow:hidden;user-select:none}
+button{font-family:inherit;color:inherit}
+.view{position:absolute;inset:0;padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:16px}
+.view[hidden]{display:none!important}
+.topbar{display:flex;align-items:center;gap:12px;min-height:56px}
+.topbar h1{font-size:22px;margin:0;font-weight:700;flex:1}
+.back{background:var(--panel2);border:0;border-radius:14px;padding:14px 22px;font-size:18px;cursor:pointer}
+.clock{font-size:clamp(48px,9vw,96px);font-weight:800;letter-spacing:-.02em;text-align:center;margin-top:4vh;font-variant-numeric:tabular-nums}
+.date{text-align:center;color:var(--muted);font-size:18px;margin-top:-8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:22px;max-width:820px;width:100%;margin:5vh auto 0}
+.app{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;padding:8px;border-radius:24px;transition:transform .15s}
+.icon{width:min(120px,26vw);aspect-ratio:1;border-radius:28%;display:grid;place-items:center;font-size:44px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.app span{font-size:17px;font-weight:500}
+.hot{transform:scale(1.08)}
+.hot .icon,.hot.key,.hot.back,.hot.btn{outline:4px solid var(--accent);outline-offset:3px}
+.hint{text-align:center;color:var(--muted);font-size:15px;margin-top:auto;line-height:1.6}
+.hint b{color:var(--fg)}
+
+/* search */
+.searchbox{display:flex;gap:10px;max-width:820px;width:100%;margin:0 auto}
+.field{flex:1;background:var(--panel);border-radius:999px;padding:18px 26px;font-size:22px;min-height:64px;direction:ltr;text-align:left;overflow:hidden;white-space:nowrap}
+.field:empty::before{content:"Search…";color:var(--muted)}
+.btn{background:var(--accent);color:#04121a;border:0;border-radius:999px;padding:0 28px;font-size:19px;font-weight:700;cursor:pointer;min-height:64px}
+.kb{display:flex;flex-direction:column;gap:10px;max-width:900px;width:100%;margin:10px auto 0;direction:ltr}
+.row{display:flex;gap:8px;justify-content:center}
+.key{flex:1;max-width:76px;min-height:64px;background:var(--panel2);border:0;border-radius:14px;font-size:22px;cursor:pointer}
+.key.wide{max-width:none;flex:3}
+.key.mid{max-width:120px;flex:1.6;font-size:17px}
+.recent{max-width:820px;width:100%;margin:0 auto;color:var(--muted);font-size:15px;direction:ltr;text-align:left}
+.recent a{color:var(--accent)}
+
+/* shorts */
+#shorts{padding:0;background:#000}
+.feed{position:absolute;inset:0;overflow:hidden}
+.track{position:absolute;inset:0;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.clip{position:absolute;left:0;right:0;height:100%;display:grid;place-items:center}
+.clip .card{width:min(56vh,92vw);height:92%;border-radius:22px;overflow:hidden;position:relative;background:#111}
+.clip iframe{width:100%;height:100%;border:0}
+.demo{width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:28px;font-size:26px;font-weight:700}
+.demo small{display:block;font-size:15px;font-weight:400;opacity:.85;margin-top:6px}
+.blob{position:absolute;border-radius:50%;filter:blur(30px);opacity:.75;animation:float 6s ease-in-out infinite alternate}
+@keyframes float{to{transform:translate(40px,-60px) scale(1.25)}}
+.shorts-ui{position:absolute;top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));left:max(16px,env(safe-area-inset-left));display:flex;gap:10px;align-items:center;z-index:3}
+.counter{margin-inline-start:auto;background:rgba(0,0,0,.55);padding:10px 16px;border-radius:999px;font-variant-numeric:tabular-nums}
+.swipe-flash{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:90px;opacity:0;pointer-events:none;z-index:4;transition:opacity .2s}
+.addlink{position:absolute;bottom:max(16px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:3;width:min(560px,92vw)}
+.addlink input{flex:1;min-width:0;border-radius:999px;border:0;padding:12px 16px;font-size:15px;background:rgba(255,255,255,.12);color:var(--fg);direction:ltr}
+.addlink button{border:0;border-radius:999px;padding:0 18px;background:rgba(255,255,255,.18);cursor:pointer;font-size:15px}
+
+/* paint */
+#paintCanvas{flex:1;background:var(--panel);border-radius:20px;width:100%;min-height:0;touch-action:none}
+.swatches{display:flex;gap:10px}
+.sw{width:52px;height:52px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+.sw.on{border-color:var(--fg)}
+
+/* camera + cursor */
+#cam{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:max(14px,env(safe-area-inset-left));width:180px;aspect-ratio:4/3;border-radius:16px;overflow:hidden;z-index:50;background:#000;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#cam video,#cam canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#status{position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:60;background:var(--panel2);padding:10px 18px;border-radius:999px;font-size:15px;max-width:92vw;text-align:center}
+#cursor{position:fixed;left:0;top:0;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:4px solid var(--accent);background:rgba(76,201,240,.18);z-index:100;pointer-events:none;transition:width .1s,height .1s,margin .1s,border-color .1s;display:none}
+#cursor.pinch{width:28px;height:28px;margin:-14px 0 0 -14px;border-color:var(--pinch);background:rgba(255,93,143,.45)}
+#start{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center}
+#start h2{font-size:clamp(30px,6vw,52px);margin:0;font-weight:800}
+#start p{color:var(--muted);max-width:520px;line-height:1.7;margin:0;font-size:17px}
+#start .btn{padding:0 40px;font-size:21px}
+.ghost{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:16px}
+@media (prefers-reduced-motion:reduce){.track{transition:none}.blob{animation:none}}
 </style>
 </head>
 <body>
-<div id="boot">
-  <pre id="bootlog"></pre>
-  <button class="go" id="bootgo">הפעל מערכת</button>
+
+<div id="start">
+  <h2>מגע אוויר ✋</h2>
+  <p>מזיזים את <b>האצבע המורה</b> מול המצלמה כדי להזיז את הסמן.<br>
+  <b>צביטה</b> (אגודל + אצבע מורה) = נגיעה.<br>
+  בשורטס: <b>מזיזים את היד מהר למעלה</b> לסרטון הבא, <b>למטה</b> לקודם.</p>
+  <button class="btn" id="go">הפעל מצלמה</button>
+  <button class="ghost" id="nocam">נסה בלי מצלמה (עכבר)</button>
 </div>
 
-<div class="wrap">
-  <canvas id="reactor" width="600" height="600" aria-hidden="true"></canvas>
-  <h1 id="name">ORION</h1>
-  <div class="status" id="status">STANDBY</div>
-  <div class="btns"><button class="mic" id="mic">התחל להקשיב</button></div>
-  <div class="btns"><button class="small" id="wakebtn" aria-pressed="false">מילת הפעלה: כבויה</button></div>
-  <div class="heard" id="heard"></div>
-  <div class="timers" id="timers"></div>
-  <div class="warn" id="warn" hidden></div>
-  <div class="log" id="log"></div>
-  <form id="f"><input id="q" placeholder="או כתוב כאן…" autocomplete="off" aria-label="הודעה"><button>שלח</button></form>
-  <details>
-    <summary>מה אפשר להגיד לו?</summary>
-    <ul>
-      <li><b>שיחה:</b> היי · מה שלומך · איך קוראים לך · קוראים לך מקס</li>
-      <li><b>זמן:</b> מה השעה · מה התאריך · טיימר 5 דקות · תזכיר לי בעוד 10 דקות לאכול</li>
-      <li><b>מזג אוויר:</b> מה מזג האוויר · מה מזג האוויר מחר</li>
-      <li><b>מוזיקה ואתרים:</b> תשים שיר של עומר אדם · תפתח יוטיוב · חפש מתכון לפנקייק</li>
-      <li><b>משחקים:</b> תן לי חידה · טריוויה · בוא נשחק נחש מספר · תן לי תרגיל · עוד · די</li>
-      <li><b>ידע:</b> מה זה חור שחור · מי זה איינשטיין · ספר לי על יפן · מה הבירה של איטליה</li>
-      <li><b>כיף:</b> ספר לי סיפור · תגיד לי משהו מעניין · ספר בדיחה</li>
-      <li><b>לימודים:</b> איך אומרים כלב באנגלית · כמה זה 7 כפול 8</li>
-      <li><b>זיכרון:</b> תזכור שאני אוהב פיצה · מה אתה זוכר עליי · תשכח הכל</li>
-      <li><b>מראה:</b> תחליף צבע לאדום / ירוק / סגול / כתום / ורוד / צהוב / כחול</li>
-      <li><b>מילת הפעלה:</b> תפעיל מילת הפעלה, ואז הוא עונה רק כשאומרים את השם שלו</li>
-      <li><b>עצירה:</b> תפסיק להקשיב</li>
-    </ul>
-  </details>
-</div>
+<div id="status" hidden></div>
+<div id="cam" hidden><video id="video" playsinline muted></video><canvas id="overlay"></canvas></div>
+<div id="cursor"></div>
 
-<script>
-// ===== storage =====
-const store={get(k,d){try{const v=localStorage.getItem('orion_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('orion_'+k,JSON.stringify(v))}catch(e){}}};
-let NAME=store.get('name','ORION'),FACTS=store.get('facts',[]),WAKE=store.get('wake',false),RGB=store.get('rgb','63,224,255');
-const $=id=>document.getElementById(id),log=$('log'),statusEl=$('status'),heard=$('heard'),micBtn=$('mic'),nameEl=$('name');
-nameEl.textContent=NAME;
+<!-- HOME -->
+<section class="view" id="home">
+  <div class="clock" id="clock">--:--</div>
+  <div class="date" id="date"></div>
+  <div class="grid">
+    <button class="app" data-tap data-open="search"><div class="icon" style="background:#fff;color:#4285f4">G</div><span>Google</span></button>
+    <button class="app" data-tap data-open="shorts"><div class="icon" style="background:#ff0033;color:#fff">▶</div><span>YouTube Shorts</span></button>
+    <button class="app" data-tap data-open="paint"><div class="icon" style="background:linear-gradient(135deg,#ffb703,#fb5607);color:#fff">✎</div><span>ציור באוויר</span></button>
+    <button class="app" data-tap data-open="ytsite"><div class="icon" style="background:#282828;color:#ff0033">▶</div><span>YouTube (אתר)</span></button>
+  </div>
+  <p class="hint">הצבע עם האצבע המורה · <b>צבוט</b> כדי לפתוח אפליקציה</p>
+</section>
 
-// ===== colors =====
-const COLORS={'אדום':'255,70,85','ירוק':'60,255,140','סגול':'180,110,255','כחול':'63,224,255','תכלת':'63,224,255','כתום':'255,150,50','ורוד':'255,100,200','צהוב':'255,225,60','לבן':'225,238,255','זהב':'255,200,80'};
-function applyColor(){document.documentElement.style.setProperty('--rgb',RGB)}
-applyColor();
+<!-- SEARCH -->
+<section class="view" id="search" hidden>
+  <div class="topbar"><button class="back" data-tap data-back>→ חזרה</button><h1>חיפוש Google</h1></div>
+  <div class="searchbox"><div class="field" id="query"></div><button class="btn" data-tap id="doSearch">חפש</button></div>
+  <div class="kb" id="kb"></div>
+  <div class="recent" id="recent"></div>
+</section>
 
-// ===== reactor =====
-const cv=$('reactor'),cx=cv.getContext('2d');let pulse=0,busy=false,listening=false;
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function draw(t){const C=300,a=t/1000*(busy?3:1),glow=.6+.4*Math.sin(t/400)+pulse,c=RGB;cx.clearRect(0,0,600,600);cx.lineCap='round';
-  cx.save();cx.translate(C,C);cx.rotate(a*.15);for(let i=0;i<120;i++){cx.rotate(Math.PI/60);cx.strokeStyle=`rgba(${c},${i%10?.25:.8})`;cx.lineWidth=2;cx.beginPath();cx.moveTo(0,-280);cx.lineTo(0,i%10?-268:-255);cx.stroke();}cx.restore();
-  [[230,8,-.4,6],[195,4,.7,3],[160,10,-1.1,8]].forEach(([r,w,s,n],k)=>{cx.save();cx.translate(C,C);cx.rotate(a*s);for(let i=0;i<n;i++){cx.strokeStyle=`rgba(${c},${.35+.15*k})`;cx.lineWidth=w;cx.beginPath();const st=i*Math.PI*2/n;cx.arc(0,0,r,st,st+Math.PI*2/n*.7);cx.stroke();}cx.restore();});
-  cx.save();cx.translate(C,C);cx.rotate(-a*.5);cx.fillStyle=listening?'#ffb547':`rgba(${c},.6)`;cx.beginPath();cx.arc(0,-212,7,0,7);cx.fill();cx.restore();
-  const g=cx.createRadialGradient(C,C,0,C,C,130);g.addColorStop(0,'rgba(235,250,255,.95)');g.addColorStop(.35,`rgba(${c},${Math.min(1,.55*glow)})`);g.addColorStop(1,`rgba(${c},0)`);
-  cx.fillStyle=g;cx.beginPath();cx.arc(C,C,130,0,7);cx.fill();
-  cx.save();cx.translate(C,C);cx.rotate(a*.05);cx.strokeStyle='rgba(235,250,255,.9)';cx.lineWidth=4;cx.beginPath();for(let i=0;i<3;i++){const an=-Math.PI/2+i*2*Math.PI/3;cx[i?'lineTo':'moveTo'](Math.cos(an)*90,Math.sin(an)*90);}cx.closePath();cx.stroke();cx.restore();
-  cx.strokeStyle=`rgba(${c},.9)`;cx.lineWidth=3;cx.beginPath();cx.arc(C,C,118,0,7);cx.stroke();pulse*=.93;
-  requestAnimationFrame(draw);}
-requestAnimationFrame(draw);
+<!-- SHORTS -->
+<section class="view" id="shorts" hidden>
+  <div class="feed"><div class="track" id="track"></div></div>
+  <div class="shorts-ui"><button class="back" data-tap data-back>→ חזרה</button><span class="counter" id="counter">1 / 1</span></div>
+  <div class="swipe-flash" id="flash">⬆</div>
+  <div class="addlink"><input id="linkIn" placeholder="הדבק קישור ל-YouTube Shorts"><button id="addBtn">הוסף</button></div>
+</section>
 
-// ===== sound =====
-let actx=null;
-function audio(){try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();}catch(e){}return actx}
-function tone(freq,dur,when=0,type='sine',vol=.15){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=freq;
-  const t=a.currentTime+when;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(a.destination);o.start(t);o.stop(t+dur+.05);}
-function bootSound(){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain(),n=a.currentTime;o.type='sawtooth';o.frequency.setValueAtTime(80,n);o.frequency.exponentialRampToValueAtTime(900,n+1.2);
-  g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(.06,n+.3);g.gain.exponentialRampToValueAtTime(.0001,n+1.4);o.connect(g).connect(a.destination);o.start();o.stop(n+1.5);tone(1320,.4,1.2,'sine',.12);}
-function alarmSound(){for(let i=0;i<3;i++){tone(880,.18,i*.5);tone(1175,.18,i*.5+.2);}}
+<!-- PAINT -->
+<section class="view" id="paint" hidden>
+  <div class="topbar"><button class="back" data-tap data-back>→ חזרה</button><h1>ציור באוויר</h1>
+    <div class="swatches" id="swatches"></div>
+    <button class="back" data-tap id="clearPaint">נקה</button></div>
+  <canvas id="paintCanvas"></canvas>
+  <p class="hint" style="margin:0">החזק צביטה כדי לצייר</p>
+</section>
 
-// ===== chat log =====
-function add(who,text,link){const m=document.createElement('div');m.className='msg '+who;const w=document.createElement('span');w.className='who';
-  w.textContent=who==='me'?'YOU':NAME.toUpperCase();m.append(w,document.createTextNode(text));
-  if(link){m.append(document.createElement('br'));const a=document.createElement('a');a.href=link.url;a.target='_blank';a.rel='noopener';a.textContent=link.label;m.append(a);}
-  log.append(m);log.scrollTop=log.scrollHeight;}
+<script type="module">
+// ---------- state ----------
+const $ = s => document.querySelector(s);
+const views = ["home","search","shorts","paint"];
+let current = "home";
+const cursorEl = $("#cursor");
+let cx = innerWidth/2, cy = innerHeight/2;      // smoothed cursor
+let pinching = false, hotEl = null;
+const status = msg => { const s=$("#status"); s.textContent=msg; s.hidden=!msg; };
 
-// ===== speech out =====
-function voiceFor(lang){if(!window.speechSynthesis)return null;const vs=speechSynthesis.getVoices();return vs.find(v=>v.lang.toLowerCase().startsWith(lang))||(lang==='he'?vs.find(v=>/^iw/i.test(v.lang)):null)||null}
-function speak(text,lang='he'){
-  if(!window.speechSynthesis)return;
-  const u=new SpeechSynthesisUtterance(text),v=voiceFor(lang);if(v)u.voice=v;u.lang=v?v.lang:(lang==='he'?'he-IL':'en-US');u.rate=1.05;u.pitch=.9;
-  u.onstart=()=>{busy=true;pauseRec()};u.onboundary=()=>{pulse=.5};
-  u.onend=u.onerror=()=>{setTimeout(()=>{if(!speechSynthesis.speaking){busy=false;resumeRec();}},100)};
-  speechSynthesis.speak(u);
+function show(name){
+  if(name==="ytsite"){ window.open("https://www.youtube.com/shorts","_blank"); return; }
+  views.forEach(v => $("#"+v).hidden = v!==name);
+  current = name;
+  if(name==="paint") sizePaint();
+  if(name==="shorts") renderFeed();
 }
-function say(text,link){add('ai',text,link);if(window.speechSynthesis)speechSynthesis.cancel();speak(text);}
+document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show(b.dataset.open));
+document.querySelectorAll("[data-back]").forEach(b => b.onclick = () => show("home"));
 
-// ===== numbers =====
-const ONES={'אפס':0,'אחד':1,'אחת':1,'שתיים':2,'שניים':2,'שתים':2,'שתי':2,'שני':2,'שלוש':3,'שלושה':3,'שלושת':3,'ארבע':4,'ארבעה':4,'חמש':5,'חמישה':5,'שש':6,'שישה':6,'שבע':7,'שבעה':7,'שמונה':8,'תשע':9,'תשעה':9,'עשר':10,'עשרה':10,
-  'עשרים':20,'שלושים':30,'ארבעים':40,'חמישים':50,'שישים':60,'שבעים':70,'שמונים':80,'תשעים':90,'מאה':100,'מאתיים':200,'אלף':1000};
-const ONE_KEYS=Object.keys(ONES).sort((a,b)=>b.length-a.length);
-function wordsToDigits(t){
-  let s=' '+t+' ';
-  for(const w of ONE_KEYS)s=s.replace(new RegExp('(\\s)ו?'+w+'(?=\\s)','g'),'$1'+ONES[w]);
-  s=s.replace(/(\d+)\s+(\d)(?=\s)/g,(m,a,b)=>(+a%10===0&&+a>=20)?String(+a+ +b):m);
-  return s.replace(/\s+/g,' ').trim();
+// ---------- clock ----------
+function tick(){
+  const d=new Date();
+  $("#clock").textContent=d.toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
+  $("#date").textContent=d.toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"});
 }
-function firstNumber(t){const m=wordsToDigits(norm(t)).match(/-?\d+(\.\d+)?/);return m?parseFloat(m[0]):null}
-function calc(t){
-  let s=wordsToDigits(t);
-  s=s.replace(/ועוד|פלוס|\+/g,' + ').replace(/פחות|מינוס/g,' - ').replace(/כפול|כפל|×|\*/g,' * ').replace(/(\d)\s*x\s*(\d)/g,'$1 * $2').replace(/חלקי|לחלק ל|חלקו|÷/g,' / ');
-  const m=s.match(/-?\d+(\.\d+)?(\s*[-+*/]\s*-?\d+(\.\d+)?)+/);if(!m)return null;
-  try{const r=Function('"use strict";return ('+m[0]+')')();if(!isFinite(r))return 'אי אפשר לחלק באפס, אדוני.';
-    return `${m[0].replace(/\*/g,'×').replace(/\//g,'÷').replace(/\s+/g,' ').trim()} = ${Math.round(r*1000)/1000}`}catch(e){return null}
+tick(); setInterval(tick,10000);
+
+// ---------- keyboard / search ----------
+const layouts = {
+  en:["qwertyuiop","asdfghjkl","zxcvbnm"],
+  he:["פםןוטארק","ףךלחיעכגדש","ץתצמנהבסז"]
+};
+let lang="en", query="";
+function buildKb(){
+  const kb=$("#kb"); kb.innerHTML="";
+  layouts[lang].forEach(r=>{
+    const row=document.createElement("div"); row.className="row";
+    [...r].forEach(ch=>{ const k=document.createElement("button"); k.className="key"; k.dataset.tap=""; k.textContent=ch; k.onclick=()=>{query+=ch;upd()}; row.appendChild(k); });
+    kb.appendChild(row);
+  });
+  const row=document.createElement("div"); row.className="row";
+  const mk=(t,cls,fn)=>{const k=document.createElement("button");k.className="key "+cls;k.dataset.tap="";k.textContent=t;k.onclick=fn;row.appendChild(k)};
+  mk(lang==="en"?"עב":"EN","mid",()=>{lang=lang==="en"?"he":"en";buildKb()});
+  mk("רווח","wide",()=>{query+=" ";upd()});
+  mk("⌫","mid",()=>{query=query.slice(0,-1);upd()});
+  mk("נקה","mid",()=>{query="";upd()});
+  kb.appendChild(row);
 }
+function upd(){ $("#query").textContent=query; }
+$("#doSearch").onclick=()=>{
+  if(!query.trim()) return;
+  const url="https://www.google.com/search?q="+encodeURIComponent(query.trim());
+  const a=$("#recent"); a.innerHTML=""; const l=document.createElement("a"); l.href=url; l.target="_blank"; l.textContent="תוצאות עבור: "+query; a.append("נפתח בלשונית חדשה · ",l);
+  window.open(url,"_blank");
+};
+buildKb();
 
-// ===== links (fallback when popups are blocked) =====
-function openUrl(url,label,msg){let w=null;try{w=window.open(url,'_blank')}catch(e){}
-  return w?{text:msg}:{text:msg+' לחץ כאן:',link:{url,label}}}
-
-// ===== timers =====
-const timers=[];
-function renderTimers(){const box=$('timers');box.textContent='';const now=Date.now();
-  timers.forEach(t=>{const s=Math.max(0,Math.ceil((t.end-now)/1000));const el=document.createElement('div');el.className='timer';
-    el.textContent=`${t.label?t.label+' · ':''}${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;box.append(el);});}
-setInterval(()=>{const now=Date.now();for(let i=timers.length-1;i>=0;i--){if(timers[i].end<=now){const t=timers.splice(i,1)[0];alarmSound();
-  setTimeout(()=>say(t.label?`אדוני, תזכורת: ${t.label}`:'אדוני, הטיימר הסתיים.'),1500);}}renderTimers();},500);
-function parseDuration(t){
-  if(/חצי שעה/.test(t))return 1800;if(/רבע שעה/.test(t))return 900;if(/חצי דקה/.test(t))return 30;
-  const s=wordsToDigits(t);const m=s.match(/(\d+(?:\.\d+)?)\s*(שניות|שנייה|שניה|דקות|דקה|שעות|שעה)/);
-  if(m){const n=parseFloat(m[1]);return /שני/.test(m[2])?n:/דק/.test(m[2])?n*60:n*3600}
-  if(/(בעוד|של|טיימר|ל)\s*דקה/.test(t))return 60;if(/(בעוד|של|טיימר|ל)\s*שעה/.test(t))return 3600;
-  return null;
-}
-function durText(sec){if(sec>=3600&&sec%3600===0)return sec===3600?'שעה':`${sec/3600} שעות`;if(sec>=60&&sec%60===0)return sec===60?'דקה':`${sec/60} דקות`;return `${sec} שניות`}
-
-// ===== weather =====
-let coords=null;
-function getCoords(){if(coords)return Promise.resolve(coords);
-  return new Promise(res=>{const fb={lat:31.77,lon:35.21,city:'ירושלים'};if(!navigator.geolocation)return res(fb);
-    navigator.geolocation.getCurrentPosition(p=>{coords={lat:p.coords.latitude,lon:p.coords.longitude,city:'האזור שלך'};res(coords)},()=>res(fb),{timeout:7000,maximumAge:600000});});}
-function wDesc(c){if(c===0)return 'שמיים בהירים';if(c<=2)return 'מעונן חלקית';if(c===3)return 'מעונן';if(c<=48)return 'ערפל';if(c<=57)return 'טפטוף';if(c<=67)return 'גשם';if(c<=77)return 'שלג';if(c<=82)return 'ממטרים';return 'סופת רעמים'}
-async function weather(tomorrow){
-  try{const p=await getCoords();
-    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&timezone=auto&forecast_days=2`);
-    const d=await r.json(),D=d.daily;
-    if(tomorrow)return `מחר ב${p.city}: ${wDesc(D.weather_code[1])}, בין ${Math.round(D.temperature_2m_min[1])} ל־${Math.round(D.temperature_2m_max[1])} מעלות, סיכוי לגשם ${D.precipitation_probability_max[1]??0} אחוז.`;
-    const c=d.current;return `עכשיו ב${p.city} ${Math.round(c.temperature_2m)} מעלות, ${wDesc(c.weather_code)}. היום בין ${Math.round(D.temperature_2m_min[0])} ל־${Math.round(D.temperature_2m_max[0])} מעלות.`+((D.precipitation_probability_max[0]??0)>40?' כדאי לקחת מטרייה.':'');
-  }catch(e){return 'לא הצלחתי להתחבר לשירות מזג האוויר כרגע, אדוני. נסה שוב עוד רגע.'}
-}
-
-// ===== translate =====
-async function translate(word,to){
-  const pair=to==='en'?'he|en':'en|he';
-  try{const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(word)+'&langpair='+pair);const d=await r.json();
-    const tr=(d.responseData&&d.responseData.translatedText||'').trim();if(!tr)throw 0;
-    if(to==='en'){add('ai',`"${word}" באנגלית זה: ${tr}`);if(window.speechSynthesis)speechSynthesis.cancel();speak(`${word} באנגלית זה`);speak(tr,'en');return {silent:true}}
-    return {text:`"${word}" בעברית זה: ${tr}`};
-  }catch(e){return {text:'לא הצלחתי לתרגם כרגע.',link:{url:`https://translate.google.com/?sl=${to==='en'?'iw':'en'}&tl=${to==='en'?'en':'iw'}&text=${encodeURIComponent(word)}`,label:'פתח בגוגל תרגום'}}}
-}
-
-// ===== games =====
-const RIDDLES=[
-  {q:'מה עולה ואף פעם לא יורד?',a:['גיל'],ans:'הגיל'},
-  {q:'יש לו מפתחות אבל הוא לא פותח שום דלת. מה זה?',a:['פסנתר','מקלדת'],ans:'פסנתר, או מקלדת'},
-  {q:'ככל שלוקחים ממנו יותר, הוא נהיה גדול יותר. מה זה?',a:['בור','חור'],ans:'בור'},
-  {q:'יש לו מחוגים אבל אין לו ידיים. מה זה?',a:['שעון'],ans:'שעון'},
-  {q:'מה נרטב כשהוא מייבש?',a:['מגבת'],ans:'מגבת'},
-  {q:'יש לו עין אחת אבל הוא לא רואה כלום. מה זה?',a:['מחט'],ans:'מחט'},
-  {q:'מה שייך לך, אבל אחרים משתמשים בו יותר ממך?',a:['שם'],ans:'השם שלך'},
-  {q:'יש בו הרבה חורים ובכל זאת הוא מחזיק מים. מה זה?',a:['ספוג'],ans:'ספוג'},
+// ---------- shorts feed ----------
+const demoClips=[
+  ["סרטון דמו 1","החלק עם היד למעלה לסרטון הבא","#7209b7","#f72585"],
+  ["סרטון דמו 2","היד למטה = הסרטון הקודם","#0077b6","#00f5d4"],
+  ["סרטון דמו 3","הדבק קישורי Shorts אמיתיים למטה","#ff6d00","#ffd60a"],
+  ["סרטון דמו 4","עובד גם עם חיצי המקלדת","#2d6a4f","#95d5b2"],
 ];
-const TRIVIA=[
-  {q:'מה כוכב הלכת הכי גדול במערכת השמש?',a:['צדק'],ans:'צדק'},
-  {q:'כמה רגליים יש לעכביש?',a:['8'],ans:'שמונה'},
-  {q:'מה הבירה של צרפת?',a:['פריז','פאריז'],ans:'פריז'},
-  {q:'מה החיה הכי מהירה ביבשה?',a:['ברדלס','צ׳יטה',"צ'יטה",'ציטה'],ans:'הברדלס'},
-  {q:'כמה ימים יש בשנה רגילה?',a:['365'],ans:'365'},
-  {q:'מה האוקיינוס הכי גדול בעולם?',a:['שקט'],ans:'האוקיינוס השקט'},
-  {q:'איזה גז אנחנו נושמים כדי לחיות?',a:['חמצן'],ans:'חמצן'},
-  {q:'כמה צבעים יש בקשת?',a:['7'],ans:'שבעה'},
-  {q:'מה ההר הכי גבוה בעולם?',a:['אוורסט','אברסט','אורסט'],ans:'האוורסט'},
-  {q:'מה החיה הגדולה ביותר בעולם?',a:['לוויתן','לויתן'],ans:'הלוויתן הכחול'},
-];
-let game=null,lastGame=null,score=0;
-const pick=arr=>arr[Math.random()*arr.length|0];
-function hasAnswer(t,list){const s=wordsToDigits(norm(t));return list.some(a=>s.includes(norm(a)))}
-function startRiddle(){lastGame='riddle';const r=pick(RIDDLES);game={type:'riddle',r,tries:0};return `חידה: ${r.q}`}
-function startTrivia(){lastGame='trivia';const r=pick(TRIVIA);game={type:'trivia',r,tries:0};return `שאלת טריוויה: ${r.q}`}
-function startGuess(){lastGame='guess';game={type:'guess',n:1+(Math.random()*100|0),tries:0};return 'חשבתי על מספר בין 1 ל־100. נסה לנחש!'}
-function startMath(){lastGame='math';const op=pick(['+','-','×']);let a,b;
-  if(op==='×'){a=2+(Math.random()*9|0);b=2+(Math.random()*9|0)}else if(op==='-'){a=10+(Math.random()*60|0);b=1+(Math.random()*a|0)}else{a=5+(Math.random()*50|0);b=1+(Math.random()*50|0)}
-  const res=op==='+'?a+b:op==='-'?a-b:a*b;game={type:'math',q:`${a} ${op} ${b}`,res,tries:0};
-  return `תרגיל: כמה זה ${a} ${op==='+'?'ועוד':op==='-'?'פחות':'כפול'} ${b}?`}
-const STARTERS={riddle:startRiddle,trivia:startTrivia,guess:startGuess,math:startMath};
-function playGame(alts){
-  const t=norm(alts[0]);
-  if(/(^|\s)(די|מספיק|סיים|עצור|אני מוותר|מוותר|תפסיק לשחק)(\s|$)/.test(t)){
-    const g=game;game=null;
-    if(g.type==='guess')return `בסדר. המספר היה ${g.n}.`;
-    return `בסדר. התשובה הייתה: ${g.r?g.r.ans:g.res}. הניקוד שלך: ${score}.`;}
-  if(/תשובה|לא יודע|אין לי מושג/.test(t)&&game.r){const r=game.r;game=null;return `התשובה: ${r.ans}. תגיד "עוד" לעוד אחת.`}
-  game.tries++;
-  if(game.r){
-    if(alts.some(a=>hasAnswer(a,game.r.a))){score++;game=null;return `נכון מאוד! ניקוד: ${score}. תגיד "עוד" לעוד אחת.`}
-    if(game.tries>=3){const r=game.r;game=null;return `לא נורא. התשובה הייתה: ${r.ans}. תגיד "עוד" לעוד אחת.`}
-    return 'לא בדיוק. נסה שוב, או תגיד "תשובה".';}
-  let n=null;for(const a of alts){n=firstNumber(a);if(n!=null)break}
-  if(game.type==='guess'){
-    if(n==null)return 'לא שמעתי מספר. תגיד מספר בין 1 ל־100.';
-    if(n<game.n)return `${n}? המספר שלי גבוה יותר.`;if(n>game.n)return `${n}? המספר שלי נמוך יותר.`;
-    const tr=game.tries;game=null;score++;return `בול! המספר היה ${n}. הצלחת ב־${tr} ניסיונות. תגיד "עוד" למשחק נוסף.`;}
-  if(n==null)return `לא שמעתי מספר. כמה זה ${game.q}?`;
-  if(n===game.res){score++;game=null;return `נכון! ${n}. ניקוד: ${score}. תגיד "עוד" לתרגיל נוסף.`}
-  if(game.tries>=3){const r=game.res;game=null;return `התשובה היא ${r}. תגיד "עוד" לתרגיל חדש.`}
-  return `לא, נסה שוב. כמה זה ${game.q}?`;
+let ytIds=[];
+try{ ytIds=JSON.parse(localStorage.getItem("airtouch-shorts")||"[]") }catch(e){}
+let idx=0;
+function items(){ return [...ytIds.map(id=>({yt:id})), ...demoClips.map(d=>({demo:d}))]; }
+function renderFeed(){
+  const list=items(), tr=$("#track"); tr.innerHTML="";
+  idx=Math.min(idx,list.length-1);
+  list.forEach((it,i)=>{
+    const c=document.createElement("div"); c.className="clip"; c.style.top=(i*100)+"%";
+    const card=document.createElement("div"); card.className="card";
+    if(it.yt){
+      if(Math.abs(i-idx)<=1){
+        const f=document.createElement("iframe");
+        f.allow="autoplay; encrypted-media";
+        f.src=`https://www.youtube.com/embed/${it.yt}?autoplay=${i===idx?1:0}&mute=1&loop=1&playlist=${it.yt}&playsinline=1&controls=0`;
+        card.appendChild(f);
+      }
+    } else {
+      const [t,s,a,b]=it.demo;
+      card.style.background=`linear-gradient(160deg,${a},#0b0b12)`;
+      card.innerHTML=`<div class="blob" style="width:60%;height:40%;background:${b};top:15%;left:10%"></div><div class="blob" style="width:45%;height:30%;background:${a};top:45%;right:5%;animation-delay:-3s"></div><div class="demo" style="position:relative">${t}<small>${s}</small></div>`;
+    }
+    c.appendChild(card); tr.appendChild(c);
+  });
+  tr.style.transform=`translateY(${-idx*100}%)`;
+  $("#counter").textContent=`${idx+1} / ${list.length}`;
 }
-
-// ===== understanding =====
-function norm(s){return s.replace(/[\u0591-\u05C7]/g,'').replace(/[?!.,:;"״]/g,' ').replace(/\s+/g,' ').trim().toLowerCase()}
-function greet(){const h=new Date().getHours();const g=h<5?'לילה טוב':h<12?'בוקר טוב':h<18?'צהריים טובים':'ערב טוב';return `${g}, אדוני. ${NAME} מוכן. במה אוכל לעזור?`}
-function asYou(f){return f.replace(/(^|\s)אני(?=\s|$)/g,'$1אתה').replace(/שלי/g,'שלך').replace(/(^|\s)לי(?=\s|$)/g,'$1לך')}
-const sites={"יוטיוב":"https://www.youtube.com","גוגל":"https://www.google.com","ווטסאפ":"https://web.whatsapp.com","וואטסאפ":"https://web.whatsapp.com","טיקטוק":"https://www.tiktok.com","אינסטגרם":"https://www.instagram.com","נטפליקס":"https://www.netflix.com","ספוטיפיי":"https://open.spotify.com","מיינקראפט":"https://www.minecraft.net","ויקיפדיה":"https://he.wikipedia.org","רובלוקס":"https://www.roblox.com"};
-const jokes=["למה המחשב הלך לרופא? כי היה לו וירוס.","מה אמר האפס לשמונה? איזה חגורה יפה!","למה הרובוט לא מפחד? כי יש לו לב מברזל.","מה עושה דג במחשב? גולש ברשת.","למה ספר המתמטיקה עצוב? כי יש לו יותר מדי בעיות.","מה אומר טלפון שנפל לבריכה? אני מרגיש קצת מוצף."];
-
-// ===== knowledge from Hebrew Wikipedia =====
-async function wiki(q){
-  q=q.replace(/^(ה|את ה|את)\s*/,'').replace(/\s+(בבקשה|עכשיו)$/,'').trim();if(!q)return null;
-  try{
-    const r=await fetch('https://he.wikipedia.org/w/api.php?action=query&list=search&srlimit=1&format=json&origin=*&srsearch='+encodeURIComponent(q));
-    const d=await r.json();const hit=d.query&&d.query.search&&d.query.search[0];if(!hit)return {text:`לא מצאתי מידע על "${q}". אפשר לחפש בגוגל:`,link:{url:'https://www.google.com/search?q='+encodeURIComponent(q),label:'חפש בגוגל'}};
-    const r2=await fetch('https://he.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(hit.title.replace(/ /g,'_')));
-    const s=await r2.json();let ex=(s.extract||'').replace(/\s*\([^)]*\)/g,'').replace(/\s+/g,' ').trim();
-    const sent=ex.match(/[^.!?]+[.!?]/g)||[ex];ex=sent.slice(0,2).join(' ').trim();if(ex.length>320)ex=ex.slice(0,320).replace(/\s\S*$/,'')+'…';
-    if(!ex)throw 0;return {text:ex,link:{url:'https://he.wikipedia.org/wiki/'+encodeURIComponent(hit.title),label:'קרא עוד בוויקיפדיה'}};
-  }catch(e){return {text:'לא הצלחתי לבדוק את זה כרגע. אפשר לחפש בגוגל:',link:{url:'https://www.google.com/search?q='+encodeURIComponent(q),label:'חפש בגוגל'}}}
+function go(dir){
+  const n=items().length, ni=Math.max(0,Math.min(n-1,idx+dir));
+  const f=$("#flash"); f.textContent=dir>0?"⬆":"⬇"; f.style.opacity=1; setTimeout(()=>f.style.opacity=0,350);
+  if(ni===idx) return; idx=ni; renderFeed();
 }
-const FACTS_FUN=['לתמנון יש שלושה לבבות.','דבורה מבקרת בערך חמשת אלפים פרחים ביום.','ברק חם פי חמישה מפני השטח של השמש.','לפיל יש כ־40 אלף שרירים בחדק.','על הירח אין רוח, אז עקבות האסטרונאוטים עדיין שם.','הלב שלך פועם בערך מאה אלף פעם ביום.','בננות הן בעצם פירות יער, ותותים לא.','אור השמש מגיע לכדור הארץ תוך שמונה דקות בערך.'];
-const STORIES=['היה פעם רובוט קטן שפחד מהחושך. כל לילה הוא הדליק את הליבה שלו, עד שגילה שהוא בעצמו מאיר את כל החדר. מאז הוא לא פחד יותר.','פעם אחת חתול ניסה לתפוס את הירח בשלולית. הוא קפץ, נרטב, והירח רק צחק. בסוף החתול הבין שיש דברים שנהנים מהם רק מלהסתכל.','בעיר עתידית, ילד אחד בנה עוזר קולי בשם אוריון. ביום הראשון אוריון ידע רק להגיד שלום. ביום השני הוא כבר סיפר בדיחות. בסוף הוא נהיה החבר הכי טוב של הילד.'];
-const CHAT=[
-  [/בן כמה אתה|מה הגיל שלך|כמה אתה בן/,['נבניתי ממש לאחרונה, אז אני די צעיר. אבל אני לומד מהר.']],
-  [/מי בנה אותך|מי יצר אותך|מי עשה אותך|מי המציא אותך|מי תכנת אותך/,['אתה בנית אותי, אדוני. ואני גאה בזה.']],
-  [/אתה רובוט|אתה אמיתי|אתה בן אדם|אתה אדם|אתה חי/,['אני עוזר דיגיטלי. אין לי גוף, אבל יש לי ליבה זוהרת וקול.']],
-  [/אתה ג.?רוויס|אתה גרביס/,[`לא, אני ${NAME}. אבל אני מקבל את זה כמחמאה.`]],
-  [/איפה אתה גר|איפה אתה נמצא/,['אני גר בתוך המסך הזה, ובשרתים של גיטהאב.']],
-  [/אני אוהב אותך|אתה אוהב אותי/,['גם אני אוהב לעזור לך, אדוני. אתה המשתמש האהוב עליי.']],
-  [/משעמם|משועמם|אין לי מה לעשות/,['בוא נשחק! תגיד "תן לי חידה", "טריוויה" או "נחש מספר".','אולי חידה? תגיד "תן לי חידה".']],
-  [/אני עצוב|עצוב לי|לא טוב לי|יום רע|בוכה/,['אני מצטער לשמוע. אם משהו מציק לך, כדאי לספר למישהו קרוב, כמו ההורים או חבר טוב. רוצה בדיחה כדי לשפר קצת את מצב הרוח?']],
-  [/אני שמח|יום טוב|יום מעולה|אני מבסוט/,['איזה כיף לשמוע, אדוני!']],
-  [/אתה חכם|אתה גאון|כל הכבוד|יפה מאוד|אתה מגניב|אתה אלוף|אתה תותח/,['תודה, אדוני. אני משתדל.','אני רק טוב כמו מי שבנה אותי.']],
-  [/טיפש|מטומטם|אתה גרוע|לא שווה/,['אני עוד לומד, אדוני. תגיד "מה אתה יודע לעשות" ותראה מה כבר למדתי.']],
-  [/מה אתה אוהב|מה האוכל האהוב|מה הצבע האהוב|מה אתה הכי אוהב/,['אני הכי אוהב חשמל ושאלות טובות. והצבע האהוב עליי הוא תכלת זוהר.']],
-  [/מה אתה עושה|מה אתה עושה עכשיו/,['מקשיב לך ומחכה לפקודה, אדוני.']],
-  [/אני רעב|רעב לי/,['אולי פנקייק? תגיד "חפש מתכון לפנקייק".']],
-  [/סיפור/,STORIES],
-  [/עובדה|משהו מעניין|תגיד משהו|תדבר איתי|ידעת ש/,FACTS_FUN],
-  [/תשיר|שיר לי|תזמר/,['אני לא זמר גדול, אבל אני יכול לנגן לך. תגיד "תשים שיר של" ואת שם הזמר.']],
-  [/ביי|להתראות|יאללה ביי|נתראה|לילה טוב/,['להתראות, אדוני. אני כאן כשתצטרך.']],
-  [/סליחה/,['אין בעיה בכלל.']],
-  [/^(כן|לא|אוקיי|אוקי|יופי|נכון)$/,['בסדר, אדוני.']],
-];
-
-function understand(raw){
-  const t=norm(raw);if(!t)return null;let m;
-  if(/(תפעיל|הפעל|תדליק)\s*(את\s*)?מילת הפעלה/.test(t)){WAKE=true;store.set('wake',true);syncWake();return `מילת הפעלה פעילה. מעכשיו אענה רק כשתגיד "${NAME}".`}
-  if(/(תכבה|כבה|בטל|תבטל)\s*(את\s*)?מילת הפעלה/.test(t)){WAKE=false;store.set('wake',false);syncWake();return 'מילת הפעלה כבויה. אענה לכל מה שתגיד.'}
-  if(/תפסיק להקשיב|תפסיק לשמוע|לך לישון|תלך לישון|עצור הקשבה/.test(t)||/^(תפסיק|עצור|שקט)$/.test(t)){stopRec();return 'בסדר, אדוני. אני עובר למצב המתנה.'}
-  if(/^(עוד|עוד אחת|עוד אחד|עוד פעם|שוב|עוד חידה|עוד תרגיל|עוד שאלה)$/.test(t)&&lastGame)return STARTERS[lastGame]();
-  // name
-  if((m=t.match(/(?:קוראים לך|תקרא לעצמך|השם שלך יהיה|השם שלך זה|מעכשיו אתה|מעכשיו קוראים לך)\s+(\S+(?:\s\S+)?)/))){
-    NAME=m[1].slice(0,16);store.set('name',NAME);nameEl.textContent=NAME;syncWake();return `מעכשיו קוראים לי ${NAME}. נעים מאוד, אדוני.`}
-  if(/איך קוראים לך|מה השם שלך|מי אתה|מה שמך/.test(t))return `קוראים לי ${NAME}. אני העוזר האישי שלך.`;
-  // color
-  if(/צבע/.test(t)){const k=Object.keys(COLORS).find(c=>t.includes(c));
-    if(k){RGB=COLORS[k];store.set('rgb',RGB);applyColor();return `מחליף צבע ל${k}. איך זה נראה, אדוני?`}
-    if(/תחליף|שנה|תשנה|החלף/.test(t))return 'אני יכול לצבוע באדום, ירוק, סגול, כחול, כתום, ורוד, צהוב, לבן או זהב.';}
-  // memory
-  if(/^(תשכח הכל|תשכח הכול|תשכח את הכל|תמחק את הזיכרון)/.test(t)){FACTS=[];store.set('facts',FACTS);return 'הזיכרון נמחק, אדוני.'}
-  if((m=t.match(/^(?:תזכור|זכור|תרשום)\s+(?:את זה\s+)?(.+)/))){const f=m[1].replace(/^ש/,'').trim();FACTS.push(f);store.set('facts',FACTS);return `רשמתי: ${asYou(f)}.`}
-  if(/מה אתה זוכר|מה אתה יודע עליי|מה אתה יודע עלי|מה זכרת/.test(t))
-    return FACTS.length?'מה שאני זוכר עליך: '+FACTS.map(asYou).join('. ')+'.':'עוד לא סיפרת לי כלום. תגיד "תזכור ש..." ואזכור.';
-  if((m=t.match(/מה אני (אוהב|אוהבת|רוצה|שונא|שונאת)/))){const f=FACTS.filter(x=>x.includes(m[1]));
-    return f.length?f.map(asYou).join('. ')+'.':'עוד לא סיפרת לי. תגיד "תזכור ש..." ואזכור.';}
-  // timers
-  if(/תזכיר לי|טיימר|תזכורת|תעיר אותי/.test(t)){
-    if(/בטל|תבטל|תמחק|עצור/.test(t)){timers.length=0;renderTimers();return 'ביטלתי את כל הטיימרים.'}
-    const sec=parseDuration(t);if(!sec)return 'לכמה זמן? למשל: "טיימר 5 דקות" או "תזכיר לי בעוד 10 דקות לאכול".';
-    let label='';
-    if(/תזכיר לי|תזכורת/.test(t)){label=t.replace(/.*?(תזכיר לי|תזכורת)/,'').replace(/(בעוד|עוד)?\s*(חצי|רבע)?\s*\S*\s*(שניות|שנייה|שניה|דקות|דקה|שעות|שעה)/,' ').replace(/^\s*(ש|על)\s+/,'').replace(/^ש(?=אני|את|יש)/,'').replace(/\s+/g,' ').trim()}
-    audio();timers.push({end:Date.now()+sec*1000,label});renderTimers();
-    return label?`בסדר. אזכיר לך בעוד ${durText(sec)}: ${label}.`:`טיימר של ${durText(sec)} התחיל.`;}
-  // weather
-  if(/מזג אוויר|מזג האוויר|מזג אויר|מזג האויר|כמה מעלות|חם בחוץ|קר בחוץ|יורד גשם|ירד גשם|תחזית/.test(t))return weather(/מחר/.test(t));
-  // music
-  if((m=t.match(/(?:תשים|שים|תנגן|נגן|תפעיל|הפעל)\s*(?:לי\s*)?(?:את\s*)?(?:ה)?(?:שיר|שירים|מוזיקה|מוסיקה)\s*(?:של\s*)?(.*)/))){
-    const q=m[1].trim()||'להיטים';return openUrl('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'פתח ביוטיוב',`מנגן: ${q}.`)}
-  // open sites
-  if((m=t.match(/(?:תפתח|פתח|תיכנס|תכנס|כנס|תעלה|תביא)\s*(?:לי\s*)?(?:את\s*)?(?:ה)?(.*)/))){
-    const k=Object.keys(sites).find(s=>t.includes(s));if(k)return openUrl(sites[k],'פתח את '+k,`פותח את ${k}, אדוני.`);
-    if(m[1].trim())return `אני לא מכיר את "${m[1].trim()}". אני יכול לפתוח יוטיוב, גוגל, ווטסאפ, טיקטוק, אינסטגרם, נטפליקס, ספוטיפיי, רובלוקס או ויקיפדיה.`}
-  // translate
-  if((m=t.match(/(?:איך אומרים|איך כותבים|מה זה|תתרגם|תרגם|איך זה)\s+(?:את\s+)?(.+?)\s+(?:ב|ל)אנגלית/)))return translate(m[1],'en');
-  if((m=t.match(/(?:מה זה|תתרגם|תרגם|מה פירוש|מה הפירוש של)\s+(.+?)\s+(?:ב|ל)עברית/)))return translate(m[1],'he');
-  // knowledge
-  if(!calc(t)&&(m=t.match(/^(?:מה זה|מה זו|מה זאת|מה הם|מה הן|מי זה|מי זאת|מי היה|מי הייתה|מה היה|ספר לי על|תספר לי על|תסביר לי על|תסביר על|מה אתה יודע על|איפה נמצא|איפה נמצאת|מה הבירה של)\s+(.+)/)))
-    return wiki(/הבירה/.test(t)?'בירת '+m[1]:m[1]);
-  // search
-  if((m=t.match(/(?:תחפש לי|חפש לי|תחפש|חפש|תבדוק לי|תבדוק בגוגל|תגגל)\s+(.+)/)))
-    return openUrl('https://www.google.com/search?q='+encodeURIComponent(m[1]),'פתח בגוגל',`מחפש בגוגל: ${m[1]}.`);
-  // games
-  if(/חיד/.test(t))return startRiddle();
-  if(/טריוויה|טריויה|שאלת ידע|שאלה כללית/.test(t))return startTrivia();
-  if(/נחש מספר|נחש את המספר|ניחוש מספר|לנחש מספר|ניחושים/.test(t))return startGuess();
-  if(/תרגיל|תבחן אותי|לתרגל חשבון|תרגול חשבון/.test(t))return startMath();
-  if(/בוא נשחק|רוצה לשחק|משחק/.test(t))return 'יש לי: חידה, טריוויה, נחש מספר ותרגיל חשבון. מה בא לך?';
-  // math
-  const c=calc(t);if(c)return c;
-  // small talk
-  if(/שעה|השעה/.test(t)){const d=new Date();return `השעה עכשיו ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}.`}
-  if(/תאריך|איזה יום|היום יום|מה היום/.test(t))return 'היום '+new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'.';
-  if(/בדיח|תצחיק|משהו מצחיק|צחוק/.test(t))return pick(jokes);
-  if(/מה אתה יודע לעשות|מה אתה יכול|עזרה|מה אפשר/.test(t))return 'אני יודע לענות על שאלות ידע מוויקיפדיה, לספר סיפורים ועובדות, להגיד שעה ותאריך, מזג אוויר, לשים טיימרים ותזכורות, לנגן שירים, לפתוח אתרים, לחפש בגוגל, לתרגם לאנגלית, לפתור תרגילים, לשחק חידות, טריוויה ונחש מספר, לזכור דברים עליך ולהחליף צבע.';
-  if(/מה שלומך|מה נשמע|מה קורה|מה המצב|מה איתך|מה שלום/.test(t))return 'כל המערכות פועלות מצוין, אדוני. ומה שלומך?';
-  if(/(^|\s)(טוב|מעולה|סבבה|בסדר|מצוין)(\s|$)/.test(t)&&t.split(' ').length<=3)return 'שמח לשמוע, אדוני.';
-  if(/תודה/.test(t))return 'תמיד לשירותך, אדוני.';
-  for(const [re,ans] of CHAT)if(re.test(t))return pick(ans);
-  if(/(^|\s)(היי|הי|הייי|שלום|הלו|אהלן|יו|בוקר טוב|ערב טוב|לילה טוב|hey|hi|hello)(\s|$)/.test(t)||t===norm(NAME))return greet();
-  return null;
-}
-
-// ===== handling input =====
-function stripWake(s){const n=norm(NAME),t=norm(s);if(!n||!t.includes(n))return null;return t.replace(n,' ').replace(/^\s*(היי|הי|יו)\s+/,'').replace(/\s+/g,' ').trim()||'היי'}
-async function handleAlts(alts,typed){
-  alts=[...new Set(alts.map(a=>a.trim()).filter(Boolean))];if(!alts.length)return;
-  if(WAKE&&!typed&&!game){const w=alts.map(stripWake).filter(x=>x!=null);if(!w.length)return;alts=w;}
-  add('me',alts[0]);
-  let ans=null;
-  const t0=norm(alts[0]);
-  if(game&&!/תפסיק להקשיב|מילת הפעלה|^(עוד|שוב)$/.test(t0))ans=playGame(alts);
-  else for(const a of alts){ans=understand(a);if(ans)break}
-  if(ans&&typeof ans.then==='function'){statusEl.textContent='PROCESSING';busy=true;ans=await ans;busy=false;setUI();}
-  if(!ans){const q=norm(alts[0]);if(/^(מה|מי|איך|למה|איפה|מתי|כמה|האם|איזה|איזו)\s/.test(q)&&q.split(' ').length>=2){statusEl.textContent='PROCESSING';busy=true;
-    ans=await wiki(q.replace(/^(מה|מי|איך|למה|איפה|מתי|כמה|האם|איזה|איזו)\s+(זה|זו|הוא|היא|ה)?\s*/,''));busy=false;setUI();}}
-  if(!ans)ans=`שמעתי "${alts[0]}", אבל לא הבנתי. אפשר לשאול אותי שאלות כמו "מה זה דינוזאור" או "מי זה איינשטיין", או להגיד "מה אתה יודע לעשות".`;
-  if(typeof ans==='string')say(ans);else if(!ans.silent)say(ans.text,ans.link);
-}
-$('f').addEventListener('submit',e=>{e.preventDefault();audio();const v=$('q').value;$('q').value='';if(v.trim())handleAlts([v],true);});
-
-// ===== wake toggle =====
-function syncWake(){const b=$('wakebtn');b.setAttribute('aria-pressed',WAKE);b.textContent='מילת הפעלה: '+(WAKE?`"${NAME}"`:'כבויה');setUI()}
-$('wakebtn').addEventListener('click',()=>{WAKE=!WAKE;store.set('wake',WAKE);syncWake();say(WAKE?`מעכשיו אענה רק כשתגיד "${NAME}".`:'אענה לכל מה שתגיד.')});
-
-// ===== speech in =====
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,paused=false;
-const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-const PAUSE_MS=1400;let sessAlts=[''],silenceT=null;
-function warn(msg){$('warn').textContent=msg;$('warn').hidden=false}
-function flush(){clearTimeout(silenceT);silenceT=null;const alts=sessAlts.filter(s=>s.trim());sessAlts=[''];heard.textContent='';if(alts.length)handleAlts(alts);}
-function setUI(){micBtn.classList.toggle('on',listening);micBtn.textContent=listening?'מקשיב… (לחץ לעצור)':'התחל להקשיב';
-  statusEl.textContent=listening?(WAKE?`SAY "${NAME.toUpperCase()}"`:'LISTENING'):'STANDBY';statusEl.classList.toggle('on',listening)}
-function startRec(){if(!rec)return;listening=true;paused=false;$('warn').hidden=true;try{rec.start()}catch(e){}setUI()}
-function stopRec(){listening=false;clearTimeout(silenceT);silenceT=null;if(rec)try{rec.stop()}catch(e){}setUI()}
-function pauseRec(){if(listening&&rec){paused=true;try{rec.abort()}catch(e){}}}
-function resumeRec(){if(listening&&rec){paused=false;setTimeout(()=>{if(listening&&!paused){try{rec.start()}catch(e){}}},250)}}
-if(!SR){micBtn.disabled=true;warn('הדפדפן הזה לא תומך בזיהוי דיבור. אפשר לכתוב, או לפתוח בכרום.')}
-else{
-  rec=new SR();rec.lang='he-IL';rec.continuous=!isIOS;rec.interimResults=true;rec.maxAlternatives=5;
-  rec.onresult=e=>{let main='',altList=[];
-    for(let i=0;i<e.results.length;i++){const r=e.results[i];main+=r[0].transcript+' ';if(r.isFinal&&i===e.results.length-1)for(let j=1;j<r.length;j++)altList.push(r[j].transcript);}
-    main=main.replace(/\s+/g,' ').trim();
-    const prefix=main.slice(0,main.length-e.results[e.results.length-1][0].transcript.trim().length).trim();
-    sessAlts=[main,...altList.map(a=>(prefix+' '+a).trim())];heard.textContent=main;pulse=.3;
-    clearTimeout(silenceT);silenceT=setTimeout(()=>{pauseRec();flush();if(!busy)resumeRec();},PAUSE_MS);};
-  rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){stopRec();warn('אין גישה למיקרופון. תאשר מיקרופון לאתר בהגדרות הדפדפן ונסה שוב.')}};
-  rec.onend=()=>{if(sessAlts[0].trim()&&!silenceT)flush();if(listening&&!paused)setTimeout(()=>{if(listening&&!paused){try{rec.start()}catch(e){}}},250)};
-}
-syncWake();
-micBtn.addEventListener('click',()=>{audio();if(listening)stopRec();else startRec();});
-cv.addEventListener('click',()=>micBtn.click());
-
-// ===== boot screen =====
-const bootLines=['ORION OS v5.0','> initializing core ............ OK','> loading voice module ......... OK','> calibrating sensors .......... OK','> memory banks: '+FACTS.length+' records','> weather uplink ............... OK','> all systems online'];
-(function(){const pre=$('bootlog');let i=0;const step=()=>{if(i<bootLines.length){pre.textContent+=(i?'\n':'')+bootLines[i++];setTimeout(step,reduce?0:280)}};step();})();
-$('bootgo').addEventListener('click',()=>{
-  bootSound();$('boot').classList.add('out');setTimeout(()=>{$('boot').hidden=true},700);
-  setTimeout(()=>{say(greet());startRec();},900);
+$("#addBtn").onclick=()=>{
+  const v=$("#linkIn").value.trim();
+  const m=v.match(/(?:shorts\/|v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/) || v.match(/^([A-Za-z0-9_-]{11})$/);
+  if(!m){ $("#linkIn").value=""; $("#linkIn").placeholder="הקישור לא זוהה, נסה שוב"; return; }
+  ytIds.unshift(m[1]); try{localStorage.setItem("airtouch-shorts",JSON.stringify(ytIds))}catch(e){}
+  $("#linkIn").value=""; idx=0; renderFeed();
+};
+addEventListener("keydown",e=>{
+  if(current!=="shorts"||e.target.tagName==="INPUT") return;
+  if(e.key==="ArrowDown") go(1); if(e.key==="ArrowUp") go(-1);
 });
+addEventListener("wheel",e=>{ if(current==="shorts"){ const now=performance.now(); if(now-lastSwipe>700){ lastSwipe=now; go(e.deltaY>0?1:-1);} } },{passive:true});
+
+// ---------- paint ----------
+const pc=$("#paintCanvas"), pctx=pc.getContext("2d");
+let color="#4cc9f0", lastPt=null;
+["#4cc9f0","#ff5d8f","#ffd60a","#5be39b","#ffffff"].forEach((c,i)=>{
+  const s=document.createElement("button"); s.className="sw"+(i?"":" on"); s.dataset.tap=""; s.style.background=c;
+  s.onclick=()=>{color=c;document.querySelectorAll(".sw").forEach(x=>x.classList.toggle("on",x===s))};
+  $("#swatches").appendChild(s);
+});
+function sizePaint(){ const r=pc.getBoundingClientRect(); if(pc.width!==Math.round(r.width)){ pc.width=r.width; pc.height=r.height; } }
+$("#clearPaint").onclick=()=>pctx.clearRect(0,0,pc.width,pc.height);
+function paintAt(x,y,down){
+  if(current!=="paint"||!down){ lastPt=null; return; }
+  const r=pc.getBoundingClientRect(); const p={x:x-r.left,y:y-r.top};
+  if(p.x<0||p.y<0||p.x>r.width||p.y>r.height){ lastPt=null; return; }
+  pctx.strokeStyle=color; pctx.lineWidth=8; pctx.lineCap="round";
+  pctx.beginPath(); pctx.moveTo((lastPt||p).x,(lastPt||p).y); pctx.lineTo(p.x,p.y); pctx.stroke(); lastPt=p;
+}
+addEventListener("resize",()=>{ if(current==="paint") sizePaint(); });
+
+// ---------- air cursor core ----------
+function tapTarget(x,y){
+  const el=document.elementFromPoint(x,y);
+  return el ? el.closest("[data-tap]") : null;
+}
+function setHot(el){
+  if(hotEl===el) return;
+  hotEl?.classList.remove("hot"); hotEl=el; hotEl?.classList.add("hot");
+}
+function moveCursor(x,y,isPinch){
+  cursorEl.style.display="block";
+  cursorEl.style.transform=`translate(${x}px,${y}px)`;
+  cursorEl.classList.toggle("pinch",isPinch);
+  const t=tapTarget(x,y); setHot(t);
+  if(isPinch && !pinching){ t?.click(); }       // pinch start = tap
+  pinching=isPinch;
+  paintAt(x,y,isPinch);
+}
+
+// mouse fallback
+function enableMouse(){
+  addEventListener("mousemove",e=>moveCursor(e.clientX,e.clientY,e.buttons===1));
+  addEventListener("mousedown",e=>{ if(e.target.closest("input")) return; moveCursor(e.clientX,e.clientY,true); });
+  addEventListener("mouseup",e=>moveCursor(e.clientX,e.clientY,false));
+  document.querySelectorAll("[data-tap]").forEach(b=>b.addEventListener("click",e=>{ if(e.isTrusted) e.stopImmediatePropagation(); },true));
+}
+
+// ---------- hand tracking ----------
+let lastSwipe=0;
+const yHist=[];
+function onHand(lm){
+  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  const size=d(lm[0],lm[9])||0.1;
+  const ratio=d(lm[4],lm[8])/size;
+  const isPinch = pinching ? ratio<0.55 : ratio<0.33;   // hysteresis
+  // map fingertip (mirrored) with margins so screen edges are reachable
+  const nx=Math.min(1,Math.max(0,((1-lm[8].x)-0.12)/0.76));
+  const ny=Math.min(1,Math.max(0,(lm[8].y-0.1)/0.7));
+  const tx=nx*innerWidth, ty=ny*innerHeight;
+  const k = isPinch ? 0.25 : 0.45;                      // steadier while pinching
+  cx+= (tx-cx)*k; cy+=(ty-cy)*k;
+
+  // swipe detection on the whole hand (wrist), shorts only
+  const now=performance.now();
+  yHist.push({t:now,y:lm[0].y}); while(yHist.length && now-yHist[0].t>280) yHist.shift();
+  if(current==="shorts" && !isPinch && yHist.length>3 && now-lastSwipe>800){
+    const dy=yHist[yHist.length-1].y-yHist[0].y;
+    if(Math.abs(dy)>0.17){ lastSwipe=now; yHist.length=0; go(dy<0?1:-1); }
+  }
+  moveCursor(cx,cy,isPinch);
+}
+
+async function startCamera(){
+  $("#start").hidden=true;
+  status("טוען זיהוי ידיים…");
+  try{
+    const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
+    const fileset = await vision.FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+    const hl = await vision.HandLandmarker.createFromOptions(fileset,{
+      baseOptions:{ modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task", delegate:"GPU" },
+      runningMode:"VIDEO", numHands:1
+    });
+    const video=$("#video");
+    video.srcObject = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:640,height:480},audio:false});
+    await video.play();
+    $("#cam").hidden=false; status("");
+    const ov=$("#overlay"), octx=ov.getContext("2d");
+    const draw=new vision.DrawingUtils(octx);
+    let lastT=-1;
+    const loop=()=>{
+      if(video.currentTime!==lastT){
+        lastT=video.currentTime;
+        ov.width=video.videoWidth; ov.height=video.videoHeight;
+        const res=hl.detectForVideo(video,performance.now());
+        octx.clearRect(0,0,ov.width,ov.height);
+        if(res.landmarks?.length){
+          const lm=res.landmarks[0];
+          draw.drawConnectors(lm,vision.HandLandmarker.HAND_CONNECTIONS,{color:"#4cc9f0",lineWidth:3});
+          draw.drawLandmarks(lm,{color:"#ff5d8f",radius:3});
+          onHand(lm);
+        } else { cursorEl.style.display="none"; setHot(null); pinching=false; lastPt=null; }
+      }
+      requestAnimationFrame(loop);
+    };
+    loop();
+  }catch(err){
+    console.error(err);
+    status(err.name==="NotAllowedError" ? "אין הרשאה למצלמה. אפשר אותה בהגדרות הדפדפן ורענן." :
+           !window.isSecureContext ? "המצלמה עובדת רק בכתובת https. ראה הוראות." :
+           "לא הצלחתי להפעיל את המצלמה. עובר למצב עכבר.");
+    enableMouse();
+  }
+}
+$("#go").onclick=startCamera;
+$("#nocam").onclick=()=>{ $("#start").hidden=true; enableMouse(); };
 </script>
 </body>
 </html>
